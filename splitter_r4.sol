@@ -1,6 +1,6 @@
 pragma solidity 0.4.13;
 
-//Revision 3
+//Revision 4
 
 contract Splitter{
     address public owner;
