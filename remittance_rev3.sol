@@ -28,8 +28,7 @@ contract Remittance {
             payable
         {
             require(msg.value != 0);//forgot to send money... in the mail?
-            require(_hashA != 0); //only possible if they didnt put a hash into the input field
-            require(remittanceStructs[msg.sender].startTime + 2 <= _getDeadline); // defines a minimum buffer of 2 blocks
+            require((_hashA != 0)&&(_hashB != 0)); //only possible if they didnt put a hash into the input field
             
             remittanceStructs[msg.sender].funds               = msg.value; //wei
             remittanceStructs[msg.sender].startTime           = block.number;
