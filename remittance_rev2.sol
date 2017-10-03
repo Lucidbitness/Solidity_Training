@@ -31,7 +31,7 @@ contract Remittance {
         {
             require(msg.value != 0);//forgot to send money... in the mail?
             require(_hash != 0); //only possible if they didnt put one into the input field
-            require(transaction[msg.sender].startTime + 1 <= _getDeadline); // gives a buffer of 20,000 blocks
+            require(transaction[msg.sender].startTime + 1 <= _getDeadline); // gives a buffer of 1 block
             
             transaction[msg.sender].funds               = msg.value; //ether
             transaction[msg.sender].startTime           = block.number;
