@@ -1,5 +1,5 @@
 pragma solidity ^0.4.11;
-//hash example, bytes16,bytes16 0xa9e27dcc1b9977d74860f3fe876ea2e6d89ce35c4629e9fc18f703203d78250f //"piz","za"
+
 contract Remittance {
     
     address public owner;
