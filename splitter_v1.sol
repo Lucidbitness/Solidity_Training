@@ -1,10 +1,11 @@
-pragma solidity 0.4.18;
+pragma solidity ^0.4.18;
 
 contract Splitter{
     address public owner;
     address public sender;
+    bool public stopDeposits;
     
-    mapping(address=>uint256) balances;
+    mapping(address=>uint256) public balances;
 
     event LogSend(address _sender, uint256 _splitValue);
     event LogRecipients(address _receiver1, uint256 _rec1Value, address _receiver2, uint256 _rec2Value);
