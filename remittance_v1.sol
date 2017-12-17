@@ -16,7 +16,6 @@ contract Remittance {
 
     event LogEtherWithdrawal(address _withdrawalAddress, uint256 _amountWithdrawn);
     event LogNewDeposit(address _depositorAddress, uint256 _amountDeposited, uint256 _blockNumberDeadline);
-    event TESTINGLogHASH(bytes32 _hash);
 
     function Remittance()
             public
@@ -46,7 +45,6 @@ contract Remittance {
 
             hashOfBothSecrets[keccak256(_hashA, _hashB)] = msg.sender;
 
-            TESTINGLogHASH(keccak256(_hashA, _hashB));
             LogNewDeposit(msg.sender, msg.value, remittanceStructs[msg.sender].withdrawalDeadline);
  
         }
@@ -62,8 +60,6 @@ contract Remittance {
             bytes32 hashKeyA = keccak256(_secretA); 
             bytes32 hashKeyB = keccak256(_secretB); 
             bytes32 hashKey = keccak256(hashKeyA, hashKeyB); 
-
-            TESTINGLogHASH(hashKey);
 
             if(remittanceStructs[hashOfBothSecrets[hashKey]].withdrawalDeadline > block.number){
                 require(msg.sender != hashOfBothSecrets[hashKey]);

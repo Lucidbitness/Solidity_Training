@@ -1,24 +1,32 @@
 pragma solidity 0.4.18;
 
-contract Remittance {
+contract RockPaperScissors {
     
     address private owner;
         
-    struct RemittanceStruct
+    struct RPSGame
         {
-            uint256 funds;
-            uint256 startTime;      
-            uint256 withdrawalDeadline; 
+            address playerOne;
+            address playerTwo;
+            uint256 playerOneFunds;
+            uint256 playerTwoFunds;
+            uint8 playerOneMove;      
+            uint8 playerTwoMove; 
         }
 
-    mapping (address => RemittanceStruct) public remittanceStructs; //address is for the Ether transmitter
-    mapping (bytes32 => address) internal hashOfBothSecrets;
+    enum RPSMoves{
+        NC, Rock, Paper, Scissors
+    }
+    mapping (uint256 => RPSGame) public activeGame; //address is for the Ether transmitter
 
-    event LogEtherWithdrawal(address _withdrawalAddress, uint256 _amountWithdrawn);
-    event LogNewDeposit(address _depositorAddress, uint256 _amountDeposited, uint256 _blockNumberDeadline);
-    event TESTINGLogHASH(bytes32 _hash);
+    event LogPlayer1Joined(address _playerOne, uint256 _amountDeposited);
+    event LogPlayer2Joined(address _playerTwo, uint256 _amountDeposited);
+    event LogPlayer1Move(address _playerOne, uint256 _amountDeposited);
+    event LogPlayer2Move(address _playerTwo, uint256 _amountDeposited);
+    event LogAnnounceWinner(address _winner, uint256 _amount);
+    //event TESTINGLogHASH(bytes32 _hash);
 
-    function Remittance()
+    function RockPaperScissors()
             public
         {
             owner = msg.sender;
@@ -31,49 +39,83 @@ contract Remittance {
             return owner;
         }
 
-    ///@notice order matters ensure hashA here is hashA below
-    function createNewRemittance(bytes32 _hashA, bytes32 _hashB, uint256 _getDeadline)   
-            external                                                                
-            payable
+    function joinGame()
+        public
+
         {
-            require(msg.value != 0);
-            require((_hashA != 0)&&(_hashB != 0));
-            require(_getDeadline > 5 && _getDeadline < 25);
-            
-            remittanceStructs[msg.sender].funds               = msg.value; 
-            remittanceStructs[msg.sender].startTime           = block.number;
-            remittanceStructs[msg.sender].withdrawalDeadline  = block.number+_getDeadline;
-
-            hashOfBothSecrets[keccak256(_hashA, _hashB)] = msg.sender;
-
-            TESTINGLogHASH(keccak256(_hashA, _hashB));
-            LogNewDeposit(msg.sender, msg.value, remittanceStructs[msg.sender].withdrawalDeadline);
- 
+            if(activeGame[msg.value].playerOneMove != 0){
+                    activeGame[msg.value].playerTwoFunds = msg.value;
+                    activeGame[msg.value].playerTwo = msg.sender;
+                    LogPlayer2Joined(address _playerTwo, uint256 _amountDeposited);
+                } else {
+                    activeGame[msg.value].playerOneFunds = msg.value;
+                    activeGame[msg.value].playerOne = msg.sender;
+                    LogPlayer1Joined(address _playerOne, uint256 _amountDeposited);
+                }
         }
- 
-    ///@notice make sure secretA is the same secret as hashA or doesnt work
-    function etherTransfer(bytes32 _secretA, bytes32 _secretB)
-            external
-            payable
-            returns(bool success)
+
+    function chooseRock()
+        public
+        { 
+            activeGame[msg.value].msg.sender = RPSMoves.Rock;
+            determineWinner(RPSMoves.Rock, msg.value);   
+        }
+
+    function choosePaper()
+        public
         {
-            require((_secretA != 0) && (_secretB != 0));
-        
-            bytes32 hashKeyA = keccak256(_secretA); 
-            bytes32 hashKeyB = keccak256(_secretB); 
-            bytes32 hashKey = keccak256(hashKeyA, hashKeyB); 
+            activeGame[msg.value].msg.sender = RPSMoves.Paper;
+            determineWinner(msg.sender, RPSMoves.Paper, msg.value);
+        }
 
-            TESTINGLogHASH(hashKey);
 
-            if(remittanceStructs[hashOfBothSecrets[hashKey]].withdrawalDeadline > block.number){
-                require(msg.sender != hashOfBothSecrets[hashKey]);
+    function chooseScissors()
+        public
+        {
+            activeGame[msg.value].msg.sender = RPSMoves.scissors;
+            determineWinner(RPSMoves.Scissors, msg.value);
+        }
+
+    function determineWinner(address _player, uint8 _rockpaperscissors, uint256 _value)
+        internal
+        payable
+    {
+        uint256 winnings;
+        bool player1;
+        bool player2;
+
+        if(activeGame[_value].playerOneMove != activeGame[_value].playerTwoMove){
+
+            if((activeGame[_value].playerOneMove == RPSMoves.rock) && activeGame[_value].playerTwoMove == RPSMoves.paper){player2 = true;}
+            if((activeGame[_value].playerOneMove == RPSMoves.rock) && activeGame[_value].playerTwoMove == RPSMoves.scissors){player1 = true;}
+            if((activeGame[_value].playerOneMove == RPSMoves.paper) && activeGame[_value].playerTwoMove == RPSMoves.rock){player1 = true;}
+            if((activeGame[_value].playerOneMove == RPSMoves.paper) && activeGame[_value].playerTwoMove == RPSMoves.scissors){player2 = true;}
+            if((activeGame[_value].playerOneMove == RPSMoves.scissors) && activeGame[_value].playerTwoMove == RPSMoves.rock){player2 = true;}
+            if((activeGame[_value].playerOneMove == RPSMoves.scissors) && activeGame[_value].playerTwoMove == RPSMoves.paper){player1 = true;}
+
+            winnings = activeGame[_value].playerOneFunds + activeGame[_value].playerTwoFunds;
+            activeGame[_value].playerOneFunds = 0;
+            activeGame[_value].playerTwoFunds = 0;
+
+            if(player1 == true){
+                activeGame[_value].playerOne.transfer(winnings);
+                LogAnnounceWinner(playerOne, winnings);
             }
-           
-            msg.sender.transfer(remittanceStructs[hashOfBothSecrets[hashKey]].funds); 
-            hashOfBothSecrets[hashKey] = 0; 
-            
-            LogEtherWithdrawal(msg.sender, remittanceStructs[hashOfBothSecrets[hashKey]].funds);
-          
-            return true;
+
+            if(player2 == true){
+                activeGame[_value].playerTwo.transfer(winnings);
+                LogAnnounceWinner(playerTwo, winnings);    
+            }
+
+
+        } else {
+
+            activeGame[_value].playerOne.transfer(activeGame[_value].playerOneFunds);
+            activeGame[_value].playerTwo.transfer(activeGame[_value].playerTwoFunds);  
         }
+
+        LogPlayer1Move(activeGame[_value].playerOneMove, _value);
+        LogPlayer2Move(activeGame[_value].playerTwoMove, _value);
+    }
+
 }
