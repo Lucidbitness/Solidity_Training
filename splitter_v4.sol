@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity 0.4.18;
 
 contract Splitter{
     address public owner;
@@ -31,13 +31,11 @@ contract Splitter{
         payable
         onlyIfRunning
         returns(bool success)
-        {
-            
+        { 
             require(msg.sender != _receiver1 && msg.sender != _receiver2);
             require(_receiver1 != 0 && _receiver2 != 0);
             require(_receiver1 != _receiver2);
             require(msg.value > 1 wei);
-            
 
             balances[msg.sender] += msg.value%2;
             balances[_receiver1] += msg.value/2;
@@ -58,8 +56,7 @@ contract Splitter{
             balances[msg.sender] -= _withdrawalAmount;
             msg.sender.transfer(_withdrawalAmount);
             LogWithdrawal(msg.sender, _withdrawalAmount);
-            return _withdrawalAmount;
-            
+            return _withdrawalAmount;  
         } 
 
     function pauseContact()
