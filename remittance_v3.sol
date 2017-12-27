@@ -68,7 +68,7 @@ contract Remittance {
             require(_secretA != 0 && _secretB != 0);
             bytes32 memKey = getRemittanceHash(_secretA, _secretB);
             uint256 amount = remittanceStructs[memKey].funds;
-
+            remittanceStructs[memKey].funds = 0;
             remittanceStructs[memKey].recipient.transfer(amount); 
             
             LogTransferRemittance(msg.sender, getRemittanceHash(_secretA, _secretB), remittanceStructs[memKey].funds);
@@ -82,12 +82,14 @@ contract Remittance {
             payable
             returns(bool success)
         {
+            bytes32 memKey = getRemittanceHash(_secretA, _secretB);
             require(_secretA != 0 && _secretB != 0);
-            bytes32 memKey = getRemittanceHash(_secretA, _secretB); 
-           
-            require(deadlinePassed(memKey));
+            require(deadlinePassed(memKey)); 
+            
+            uint256 amount = remittanceStructs[memKey].funds;
+            remittanceStructs[memKey].funds = 0;
               
-            remittanceStructs[memKey].remitInitiator.transfer(remittanceStructs[memKey].funds); 
+            remittanceStructs[memKey].remitInitiator.transfer(amount); 
             
             LogTransferRefund(msg.sender, remittanceStructs[memKey].funds);
           
