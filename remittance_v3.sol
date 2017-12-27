@@ -66,9 +66,8 @@ contract Remittance {
             returns(bool success)
         {
             require(_secretA != 0 && _secretB != 0);
-            bytes32 memKey;
+            bytes32 memKey = getRemittanceHash(_secretA, _secretB);
             uint256 amount = remittanceStructs[memKey].funds;
-            getRemittanceHash(_secretA, _secretB);
 
             remittanceStructs[memKey].recipient.transfer(amount); 
             
@@ -84,9 +83,8 @@ contract Remittance {
             returns(bool success)
         {
             require(_secretA != 0 && _secretB != 0);
-            bytes32 memKey; 
-            getRemittanceHash(_secretA, _secretB);
-
+            bytes32 memKey = getRemittanceHash(_secretA, _secretB); 
+           
             require(deadlinePassed(memKey));
               
             remittanceStructs[memKey].remitInitiator.transfer(remittanceStructs[memKey].funds); 
