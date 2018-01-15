@@ -39,8 +39,10 @@ contract RockPaperScissors {
             return owner;
         }
 
+    ///@notice must send Ether to this function
     function joinGame()
         public
+        payable
 
         {
             if(activeGame[msg.value].playerOneMove != 0){
@@ -54,27 +56,7 @@ contract RockPaperScissors {
                 }
         }
 
-    function chooseRock()
-        public
-        { 
-            activeGame[msg.value].msg.sender = RPSMoves.Rock;
-            determineWinner(RPSMoves.Rock, msg.value);   
-        }
-
-    function choosePaper()
-        public
-        {
-            activeGame[msg.value].msg.sender = RPSMoves.Paper;
-            determineWinner(msg.sender, RPSMoves.Paper, msg.value);
-        }
-
-
-    function chooseScissors()
-        public
-        {
-            activeGame[msg.value].msg.sender = RPSMoves.scissors;
-            determineWinner(RPSMoves.Scissors, msg.value);
-        }
+   
 
     function determineWinner(address _player, uint8 _rockpaperscissors, uint256 _value)
         internal
